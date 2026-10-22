@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b5c6b">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Atlas</title>
+<style>
+:root{--bg:#f3f5f7;--panel:#fff;--panel2:#e9edf1;--line:#d4dae1;--fg:#17212b;--mute:#5c6b7a;--accent:#0b5c6b;--accent-fg:#fff;--accent-soft:#d6ebee;--ok:#1f7a3f;--ok-soft:#dcf1e2;--warn:#a35c00;--warn-soft:#fbeccf;--bad:#b3261e;--bad-soft:#f9dcd9;--info:#2f4e8a;--info-soft:#dfe6f6}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:5;background:var(--accent);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+header h1{font-size:17px;margin:0;font-weight:600}
+header .ctx{font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{background:rgba(255,255,255,.18);border:0;color:#fff;font-size:18px;width:36px;height:36px;border-radius:8px}
+main{padding:12px 14px 90px;max-width:620px;margin:0 auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+h2{font-size:14px;margin:0 0 8px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+label{display:block;font-size:13px;color:var(--mute);margin:8px 0 2px}
+input,select,textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg)}
+textarea{min-height:60px}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+.btn{display:block;width:100%;font:inherit;font-weight:600;padding:13px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--fg);margin-top:8px}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.big{font-size:18px;padding:18px}
+.btn.warn{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5}
+.bal{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center}
+.bal div{background:var(--panel2);border-radius:8px;padding:8px 4px}
+.bal .l{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+.bal .v{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.bal .v.neg{color:var(--bad)}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:grid;grid-template-columns:30px 1fr;gap:8px;padding:8px 6px;border-top:1px solid var(--line);align-items:start}
+.tl li:first-child{border-top:0}
+.n{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.n.leg{background:var(--info)}.n.grey{background:var(--mute)}
+.t{font-weight:600}.sub{font-size:12.5px;color:var(--mute)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chip{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--panel2);color:var(--mute)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.info{background:var(--info-soft);color:var(--info)}
+.chip.btn2{border:1px dashed var(--warn);background:transparent;color:var(--warn)}
+.sheet{position:fixed;inset:0;background:rgba(10,14,18,.55);z-index:20;display:flex;align-items:flex-end}
+.sheet .box{background:var(--panel);width:100%;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
+.sheet h3{margin:0 0 6px;font-size:17px}
+.preview{width:100%;max-height:260px;object-fit:contain;background:#000;border-radius:8px;margin-top:6px;display:none}
+.status{font-size:12.5px;color:var(--mute);margin-top:6px}.status.bad{color:var(--bad)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#17212b;color:#fff;padding:10px 16px;border-radius:999px;font-size:13.5px;z-index:40;max-width:90vw;text-align:center}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:6}
+.tabs button{flex:1;border:0;background:none;font:inherit;font-size:12px;padding:10px 4px 8px;color:var(--mute)}
+.tabs button[aria-selected=true]{color:var(--accent);font-weight:700}
+.muted{color:var(--mute);font-size:13px}
+.camwrap{position:relative}
+.camwrap input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%}
+.daylist li{list-style:none;padding:10px 0;border-top:1px solid var(--line)}
+.daylist li:first-child{border-top:0}
+.up{font-size:12px;color:var(--mute)}
+.check li{margin:4px 0}
+.small{font-size:12px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><div style="min-width:0"><h1>Atlas</h1><div class="ctx" id="ctx">—</div></div><button id="gearBtn" aria-label="Settings">⚙</button></header>
+
+<main>
+<!-- SETTINGS -->
+<section id="settings" hidden>
+  <div class="card"><h2>This phone</h2>
+    <label>Your name (as on the FA list)<input id="setName" autocomplete="name"></label>
+    <label>Team / MIM<input id="setTeam" placeholder="e.g. Team Anne"></label>
+    <label>Projects you work on (one per line)<textarea id="setProjects" placeholder="NESTLE 2026&#10;PCPPI SWEEP"></textarea></label>
+  </div>
+  <div class="card"><h2>Upload</h2>
+    <label>Upload link (Google script URL ending in /exec)<input type="url" id="setUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label>
+    <label>Token phrase (same as in the script)<input id="setToken" autocomplete="off"></label>
+    <div class="row"><button class="btn" id="testSet">Test link</button><button class="btn primary" id="saveSet">Save</button></div>
+    <div class="status" id="setStatus"></div>
+    <p class="muted small" id="storageInfo"></p>
+  </div>
+</section>
+
+<!-- TODAY -->
+<section id="today">
+  <div class="card">
+    <div class="row"><div><label>Project today</label><select id="project"></select></div><div><label>Word of the day</label><input id="wod" autocapitalize="characters" autocomplete="off" placeholder="today's word"></div></div>
+    <div class="bal" style="margin-top:10px"><div><div class="l">Budget</div><div class="v" id="bRel">—</div></div><div><div class="l">Spent</div><div class="v" id="bSpent">—</div></div><div><div class="l">Remaining</div><div class="v" id="bRem">—</div></div></div>
+    <button class="btn ghost small" id="addBudget">+ Add budget line</button>
+  </div>
+  <div class="card" id="punchCard">
+    <div id="punchBtns"></div>
+    <div class="status" id="punchHint"></div>
+  </div>
+  <div class="card"><h2>Today</h2>
+    <ol class="tl" id="timeline"></ol>
+    <button class="btn" id="addExp">+ Add expense</button>
+  </div>
+</section>
+
+<!-- DAYS -->
+<section id="days" hidden>
+  <div class="card"><h2>Previous days</h2><ul class="daylist" id="dayList"></ul></div>
+  <div class="card"><h2>Budget lines</h2><ul class="daylist" id="budList"></ul></div>
+</section>
+
+<!-- UPLOAD -->
+<section id="upload" hidden>
+  <div class="card"><h2>Upload</h2><div id="upSummary" class="muted"></div><button class="btn primary" id="uploadBtn">Upload now</button><div class="status" id="upStatus"></div></div>
+</section>
+</main>
+
+<nav class="tabs"><button data-tab="today" aria-selected="true">Today</button><button data-tab="days">Days &amp; budget</button><button data-tab="upload">Upload</button></nav>
+
+<!-- PUNCH SHEET -->
+<div class="sheet" id="punchSheet" hidden><div class="box">
+  <h3 id="pTitle">Punch</h3>
+  <div id="pDoorWrap"><label>Store / door name<input id="pDoor" list="doorList" placeholder="e.g. Puregold Balagtas"><datalist id="doorList"></datalist></label></div>
+  <label>Remarks (optional)<input id="pNote" placeholder="e.g. done checking"></label>
+  <div class="camwrap"><button class="btn">📷 Take selfie</button><input type="file" id="pPhoto" accept="image/*" capture="user"></div>
+  <img class="preview" id="pPrev" alt="">
+  <div class="status" id="pGps">Getting location…</div>
+  <div class="row"><button class="btn" id="pCancel">Cancel</button><button class="btn primary" id="pOk" disabled>Confirm punch</button></div>
+</div></div>
+
+<!-- EXPENSE SHEET -->
+<div class="sheet" id="expSheet" hidden><div class="box">
+  <h3 id="eTitle">Add expense</h3>
+  <label>This expense is for<select id="eAttach"></select></label>
+  <div class="row"><div><label>Category</label><select id="eCat"></select></div><div><label id="eSubL">Sub-category</label><select id="eSub"></select></div></div>
+  <label>Amount (₱)<input id="eAmt" type="number" inputmode="decimal" min="0" step="0.01"></label>
+  <label id="eNoteL">Note<input id="eNote" placeholder="only if needed"></label>
+  <div class="camwrap"><button class="btn">📷 Receipt / ticket photo</button><input type="file" id="ePhoto" accept="image/*" capture="environment"></div>
+  <img class="preview" id="ePrev" alt="">
+  <div class="status" id="eHint"></div>
+  <div class="row"><button class="btn" id="eCancel">Cancel</button><button class="btn primary" id="eOk">Save</button></div>
+</div></div>
+
+<!-- BUDGET SHEET -->
+<div class="sheet" id="budSheet" hidden><div class="box">
+  <h3>Budget line</h3>
+  <label>Project<select id="bProject"></select></label>
+  <div class="row"><div><label>Amount received (₱)</label><input id="bAmt" type="number" inputmode="decimal" min="0"></div><div><label>For how many days</label><input id="bDays" type="number" inputmode="numeric" min="1" value="1"></div></div>
+  <label>Note (e.g. top-up, run dates)<input id="bNote"></label>
+  <div class="camwrap"><button class="btn">📷 GCash screenshot (optional)</button><input type="file" id="bPhoto" accept="image/*"></div>
+  <img class="preview" id="bPrev" alt="">
+  <div class="row"><button class="btn" id="bCancel">Cancel</button><button class="btn primary" id="bOk">Save</button></div>
+</div></div>
+
+<!-- END DAY CHECK -->
+<div class="sheet" id="endSheet" hidden><div class="box">
+  <h3>Before you end the day</h3>
+  <ul class="check" id="endList"></ul>
+  <div class="row"><button class="btn" id="endLater">Add them first</button><button class="btn warn" id="endAnyway">End day anyway</button></div>
+</div></div>
+
+<script>
+const VERSION='atlas 0.1';
+const CATS={
+  "Transportation":["Jeepney","Tricycle","Bus","MRT / LRT","Boat","Pedicab","Grab / Taxi","Van","UV Express","Other"],
+  "Lodging":["Lodging"],
+  "Meal allowance":["Fieldwork meal"],
+  "Load allowance":["Load"],
+  "Transmittal":["LBC","Lalamove","Grab","DHL","J&T","Other courier"],
+  "POP Expense":["POP"],
+  "Photocopy Printing":["Print"],
+  "Lamination":["Lamination"],
+  "Token Expense":["Token"],
+  "Others":["Others"]};
+const NEEDS_NOTE={"Others":"What was bought (tape measure, uniform, ID, weighing scale…)","Transmittal":"Tracking / waybill number","Token Expense":"Number of respondents","Lodging":"Where, how many nights"};
+const $=id=>document.getElementById(id);
+let CFG={url:'',token:'',name:'',team:'',projects:[]};
+let DAYS={};   // date -> {date,project,wod,events:[],ended:false}
+let EXP=[];    // expenses
+let BUD=[];    // budget lines
+let QUEUE_RUNNING=false;
+const DEVICE=(function(){try{let d=localStorage.getItem('atlas.device');if(!d){d=Math.random().toString(36).slice(2,8).toUpperCase();localStorage.setItem('atlas.device',d)}return d}catch(e){return 'XXXXXX'}})();
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast('Phone storage is full. Upload first.')}}
+function load(k,d){try{const j=localStorage.getItem(k);return j?JSON.parse(j):d}catch(e){return d}}
+function persist(){save('atlas.days',DAYS);save('atlas.exp',EXP);save('atlas.bud',BUD)}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function pad(n){return String(n).padStart(2,'0')}
+function nowParts(){const d=new Date();return{date:`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,hhmm:`${pad(d.getHours())}:${pad(d.getMinutes())}`,iso:d.toISOString()}}
+const peso=n=>'₱'+(+n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+function km(a,b){if(!a||!b||a.lat==null||b.lat==null)return null;const R=6371,r=x=>x*Math.PI/180,dl=r(b.lat-a.lat),dg=r(b.lng-a.lng),s=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(s))}
+function mins(a,b){return Math.round((new Date(b)-new Date(a))/60000)}
+function dur(a,b){const m=mins(a,b);return `${Math.floor(m/60)}h ${m%60}m`}
+
+/* ---------- photos in IndexedDB ---------- */
+const DB=new Promise((res,rej)=>{const r=indexedDB.open('atlas',1);r.onupgradeneeded=()=>r.result.createObjectStore('ph');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+async function dbPut(k,b){const d=await DB;return new Promise((res,rej)=>{const t=d.transaction('ph','readwrite');t.objectStore('ph').put(b,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})}
+async function dbGet(k){const d=await DB;return new Promise((res,rej)=>{const r=d.transaction('ph').objectStore('ph').get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function dbDel(k){const d=await DB;return new Promise((res,rej)=>{const t=d.transaction('ph','readwrite');t.objectStore('ph').delete(k);t.oncomplete=res;t.onerror=()=>rej(t.error)})}
+async function dbCount(){const d=await DB;return new Promise(res=>{const r=d.transaction('ph').objectStore('ph').count();r.onsuccess=()=>res(r.result)})}
+function b64(blob){return new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result.split(',')[1]);fr.readAsDataURL(blob)})}
+// resize + stamp
+async function stampPhoto(file,lines,maxW){const img=await createImageBitmap(file);const sc=Math.min(1,maxW/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);const x=c.getContext('2d');x.drawImage(img,0,0,c.width,c.height);
+  if(lines&&lines.length){const fs=Math.max(14,Math.round(c.width/34));x.font=`bold ${fs}px system-ui,sans-serif`;const lh=fs*1.35,h=lh*lines.length+fs*.8;x.fillStyle='rgba(0,0,0,.6)';x.fillRect(0,c.height-h,c.width,h);x.fillStyle='#fff';lines.forEach((l,i)=>x.fillText(l,fs*.5,c.height-h+lh*(i+1)-fs*.25));
+    x.fillStyle='rgba(0,0,0,.6)';x.fillRect(0,0,c.width,lh+fs*.4);x.fillStyle='#ffd36b';x.fillText(lines[0],fs*.5,lh)}
+  return new Promise(res=>c.toBlob(res,'image/jpeg',0.82))}
+
+/* ---------- GPS ---------- */
+function getGps(){return new Promise(res=>{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(p=>res({lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy)}),()=>res(null),{enableHighAccuracy:true,timeout:20000,maximumAge:0})})}
+
+/* ---------- day model ---------- */
+function today(){const p=nowParts();if(!DAYS[p.date])DAYS[p.date]={date:p.date,project:'',wod:'',events:[],ended:false};return DAYS[p.date]}
+function legs(day){const ev=day.events;const out=[];let from=null;for(const e of ev){if(e.k==='start'||e.k==='leave')from=e;else if((e.k==='arrive'||e.k==='end')&&from){out.push({from,to:e,fromLabel:from.door||'Start',toLabel:e.door||'End of day',dist:km(from,e)});from=null}}return out}
+function doors(day){return day.events.filter(e=>e.k==='arrive').map(a=>{const i=day.events.indexOf(a);const l=day.events[i+1]&&day.events[i+1].k==='leave'?day.events[i+1]:null;return{a,l}})}
+function state(day){const ev=day.events;if(day.ended)return 'ended';if(!ev.length)return 'none';const last=ev[ev.length-1];if(last.k==='arrive')return 'atdoor';return 'moving'}
+function expFor(date){return EXP.filter(x=>x.date===date)}
+function legFares(date,leg){return expFor(date).filter(x=>x.attach.type==='leg'&&x.attach.from===leg.from.id&&x.attach.to===leg.to.id)}
+function doorExp(date,a){return expFor(date).filter(x=>x.attach.type==='door'&&x.attach.door===a.id)}
+function balance(project){const rel=BUD.filter(b=>b.project===project&&!b.closed).reduce((s,b)=>s+b.amt,0);const since=BUD.filter(b=>b.project===project&&!b.closed).map(b=>b.date).sort()[0]||'0000';const sp=EXP.filter(x=>x.project===project&&x.date>=since).reduce((s,x)=>s+x.amt,0);return{rel,sp,rem:rel-sp}}
+
+/* ---------- render ---------- */
+function ctx(){const d=today();const n=CFG.name||'no name set';$('ctx').textContent=`${n}${CFG.team?' · '+CFG.team:''} · ${d.date}`}
+function renderProjects(){const d=today();const sel=$('project');sel.innerHTML='';(CFG.projects||[]).forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o)});if(d.project)sel.value=d.project;else if(CFG.projects[0]){d.project=CFG.projects[0]}
+  const bp=$('bProject');bp.innerHTML=sel.innerHTML}
+function renderToday(){const d=today();ctx();$('wod').value=d.wod||'';const b=balance(d.project);$('bRel').textContent=b.rel?peso(b.rel):'—';$('bSpent').textContent=peso(b.sp);const r=$('bRem');r.textContent=b.rel?peso(b.rem):'—';r.className='v'+(b.rem<0?' neg':'');
+  const st=state(d);const B=$('punchBtns');B.innerHTML='';const mk=(t,cls,k)=>{const x=document.createElement('button');x.className='btn big '+cls;x.textContent=t;x.onclick=()=>openPunch(k);B.appendChild(x)};
+  if(st==='none')mk('▶ Start day','primary','start');
+  else if(st==='moving'){mk('📍 Arrive at store','primary','arrive');mk('■ End day','','end')}
+  else if(st==='atdoor'){mk('↩ Leave store','primary','leave')}
+  else{const p=document.createElement('p');p.className='muted';p.textContent='Day ended. You can still add expenses to today\'s legs and doors below.';B.appendChild(p)}
+  $('punchHint').textContent=st==='atdoor'?'At '+(d.events[d.events.length-1].door||'store')+' since '+d.events[d.events.length-1].t:(st==='moving'?'Travelling. Tap Arrive when you reach the next store.':'');
+  // timeline
+  const tl=$('timeline');tl.innerHTML='';const L=legs(d);let vi=0;
+  if(!d.events.length){tl.innerHTML='<li><span class="n grey">–</span><div class="muted">No punches yet. Tap Start day.</div></li>'}
+  d.events.forEach((e,i)=>{if(e.k==='start'||e.k==='end'){tl.appendChild(li(`<span class="n grey">${e.k==='start'?'S':'E'}</span>`,`<div class="t">${e.t} · ${e.k==='start'?'Start of day':'End of day'}</div><div class="sub">${gpsText(e)} ${e.note?'· '+e.note:''}</div>${upChip(e)}`))}
+    if(e.k==='arrive'){vi++;const l=d.events[i+1]&&d.events[i+1].k==='leave'?d.events[i+1]:null;const ex=doorExp(d.date,e);tl.appendChild(li(`<span class="n">V${vi}</span>`,`<div class="t">${e.t}${l?'–'+l.t:''} · ${e.door||'(no name)'}${l?' · '+dur(e.iso,l.iso):''}</div><div class="sub">${gpsText(e)} ${l&&l.note?'· '+l.note:''}</div><div class="chips">${ex.map(chip).join('')}${upChip(e)}</div>`))}
+    // leg after a start/leave
+    if(e.k==='start'||e.k==='leave'){const leg=L.find(g=>g.from.id===e.id);if(leg){const f=legFares(d.date,leg);const tot=f.reduce((s,x)=>s+x.amt,0);tl.appendChild(li(`<span class="n leg">→</span>`,`<div class="t">${leg.from.t}–${leg.to.t} · Travel ${leg.fromLabel} → ${leg.toLabel}</div><div class="sub">${dur(leg.from.iso,leg.to.iso)}${leg.dist!=null?' · '+leg.dist.toFixed(1)+' km':''}</div><div class="chips">${f.map(chip).join('')}${!f.length&&(leg.dist==null||leg.dist>0.3)?`<button class="chip btn2" data-leg="${leg.from.id}|${leg.to.id}">+ add fare</button>`:''}</div>`))}
+      else if(st!=='ended'&&i===d.events.length-1){tl.appendChild(li(`<span class="n leg">→</span>`,`<div class="t">${e.t} · Travelling…</div><div class="sub">fare can be added once you arrive</div>`))}}});
+  tl.querySelectorAll('[data-leg]').forEach(b=>b.onclick=()=>{const [f,t]=b.dataset.leg.split('|');openExpense({type:'leg',from:f,to:t})});
+  renderDoorList()}
+function li(a,b){const l=document.createElement('li');l.innerHTML=a+'<div style="min-width:0">'+b+'</div>';return l}
+function gpsText(e){return e.lat!=null?`${e.lat}, ${e.lng} (±${e.acc} m)`:'no GPS'}
+function upChip(e){return e.status==='sent'?'':`<span class="chip ${e.status==='failed'?'warn':''}">${e.status==='failed'?'not uploaded':'to upload'}</span>`}
+function chip(x){return `<span class="chip ${x.receiptKey?'ok':'info'}">${x.sub} ${peso(x.amt)}${x.receiptKey?'':' · no receipt'}</span>`}
+function renderDoorList(){const dl=$('doorList');dl.innerHTML='';const seen=new Set();Object.values(DAYS).forEach(d=>d.events.forEach(e=>{if(e.door&&!seen.has(e.door)){seen.add(e.door);const o=document.createElement('option');o.value=e.door;dl.appendChild(o)}}))}
+function renderDays(){const ul=$('dayList');ul.innerHTML='';const ds=Object.values(DAYS).sort((a,b)=>b.date.localeCompare(a.date));if(!ds.length)ul.innerHTML='<li class="muted">Nothing yet.</li>';
+  ds.forEach(d=>{const ex=expFor(d.date);const tot=ex.reduce((s,x)=>s+x.amt,0);const pend=d.events.filter(e=>e.status!=='sent').length+ex.filter(x=>x.status!=='sent').length;const l=document.createElement('li');l.innerHTML=`<div class="t">${d.date} · ${d.project||'—'}</div><div class="sub">${doors(d).length} doors · ${legs(d).length} legs · ${ex.length} expenses, ${peso(tot)}</div><div class="up">${pend?pend+' item(s) to upload':'all uploaded'}</div>`;ul.appendChild(l)});
+  const bl=$('budList');bl.innerHTML='';if(!BUD.length)bl.innerHTML='<li class="muted">No budget lines. Add one from Today when a run starts.</li>';
+  BUD.slice().reverse().forEach(b=>{const l=document.createElement('li');const bal=balance(b.project);l.innerHTML=`<div class="t">${b.date} · ${b.project} · ${peso(b.amt)} for ${b.days} day(s)</div><div class="sub">${b.note||''} ${b.closed?'· run closed, remaining '+peso(b.closedRem):''}</div>${b.closed?'':`<button class="btn small" data-close="${b.id}">Close this run (remaining ${peso(bal.rem)})</button>`}`;bl.appendChild(l)});
+  bl.querySelectorAll('[data-close]').forEach(x=>x.onclick=()=>{const b=BUD.find(y=>y.id===x.dataset.close);const bal=balance(b.project);BUD.filter(y=>y.project===b.project&&!y.closed).forEach(y=>{y.closed=true;y.closedRem=bal.rem;y.status='queued'});persist();renderDays();renderToday();toast(bal.rem>=0?`Run closed. To return: ${peso(bal.rem)}`:`Run closed. To reimburse: ${peso(-bal.rem)}`);enqueue(true)})}
+function renderUpload(){const items=pending();$('upSummary').textContent=items.length?`${items.length} item(s) waiting: ${items.filter(i=>i.kind==='punch').length} punches, ${items.filter(i=>i.kind==='expense').length} expenses, ${items.filter(i=>i.kind==='budget').length} budget lines.`:'Everything is uploaded.'}
+
+/* ---------- settings ---------- */
+function renderCfg(){$('setName').value=CFG.name||'';$('setTeam').value=CFG.team||'';$('setProjects').value=(CFG.projects||[]).join('\n');$('setUrl').value=CFG.url||'';$('setToken').value=CFG.token||''}
+$('gearBtn').onclick=async()=>{const s=$('settings');s.hidden=!s.hidden;if(!s.hidden){renderCfg();$('storageInfo').textContent=`${await dbCount()} photo(s) kept on this phone until uploaded. App ${VERSION}, phone id ${DEVICE}.`}};
+$('saveSet').onclick=()=>{const u=$('setUrl').value.trim(),st=$('setStatus');
+  if(/googleusercontent\.com/.test(u)){st.className='status bad';st.textContent='That is the address the browser was redirected to, not the upload link. Use the Web app URL from Apps Script: it starts with https://script.google.com/macros/s/ and ends in /exec.';return}
+  if(u&&!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(u)){st.className='status bad';st.textContent='The upload link should start with https://script.google.com/macros/s/ and end in /exec.';return}
+  CFG={url:u,token:$('setToken').value.trim(),name:$('setName').value.trim(),team:$('setTeam').value.trim(),projects:$('setProjects').value.split('\n').map(s=>s.trim()).filter(Boolean)};save('atlas.cfg',CFG);renderProjects();renderToday();st.className='status';st.textContent='Saved.';if(CFG.name&&CFG.url)$('settings').hidden=true};
+$('testSet').onclick=async()=>{const st=$('setStatus');st.className='status';st.textContent='Testing…';try{const r=await fetch($('setUrl').value.trim(),{cache:'no-store'});const j=await r.json();st.textContent=j.ok?`Upload link answers (script ${j.version||'?'}). Good.`:'Link answered but not as expected.'}catch(e){st.className='status bad';st.textContent='Could not reach the link. Check it is the /exec address and the deployment is "Anyone".'}};
+$('project').onchange=()=>{today().project=$('project').value;persist();renderToday()};
+$('wod').onchange=()=>{today().wod=$('wod').value.trim().toUpperCase();$('wod').value=today().wod;persist()};
+
+/* ---------- punch ---------- */
+let P=null;
+function openPunch(k){const d=today();if(!CFG.name||!CFG.url){toast('Fill in Settings first (name, upload link)');$('settings').hidden=false;return}
+  if(!d.project){toast('Pick the project first');return}if(!d.wod){toast('Enter the word of the day');$('wod').focus();return}
+  if(k==='end'){const L=legs(d);const gaps=L.filter(l=>(l.dist==null||l.dist>0.3)&&!legFares(d.date,l).length);const noR=expFor(d.date).filter(x=>!x.receiptKey&&needsReceipt(x));const ul=$('endList');ul.innerHTML='';
+    if(gaps.length||noR.length){gaps.forEach(l=>ul.innerHTML+=`<li>No fare for <b>${l.fromLabel} → ${l.toLabel}</b> (${l.from.t}–${l.to.t})</li>`);noR.forEach(x=>ul.innerHTML+=`<li>No receipt on <b>${x.sub} ${peso(x.amt)}</b></li>`);$('endSheet').hidden=false;return}}
+  startPunch(k)}
+$('endLater').onclick=()=>$('endSheet').hidden=true;$('endAnyway').onclick=()=>{$('endSheet').hidden=true;startPunch('end')};
+async function startPunch(k){P={k,gps:null,blob:null};$('pTitle').textContent={start:'Start day',arrive:'Arrive at store',leave:'Leave store',end:'End day'}[k];$('pDoorWrap').hidden=k!=='arrive';$('pDoor').value='';$('pNote').value='';$('pPhoto').value='';$('pPrev').style.display='none';$('pOk').disabled=true;$('pGps').className='status';$('pGps').textContent='Getting location…';$('punchSheet').hidden=false;
+  P.gps=await getGps();if(!P)return;if(P.gps){$('pGps').textContent=`Location: ${P.gps.lat}, ${P.gps.lng} (±${P.gps.acc} m)`}else{$('pGps').className='status bad';$('pGps').textContent='No GPS yet. Move near a window or outside and tap Retry.';const b=document.createElement('button');b.className='btn small';b.textContent='Retry location';b.onclick=async()=>{$('pGps').textContent='Getting location…';P.gps=await getGps();$('pGps').textContent=P.gps?`Location: ${P.gps.lat}, ${P.gps.lng} (±${P.gps.acc} m)`:'Still no GPS. You can confirm without it; it will be marked "no GPS".';checkPunch()};$('pGps').appendChild(b)}checkPunch()}
+function checkPunch(){$('pOk').disabled=!(P&&P.blob)}
+$('pPhoto').onchange=async()=>{const f=$('pPhoto').files[0];if(!f)return;const d=today(),p=nowParts();const door=$('pDoor').value.trim();const lines=[`${p.date} ${p.hhmm}  ${$('pTitle').textContent}${door?' · '+door:''}`,`${CFG.name} · WOD ${d.wod}`,P.gps?`${P.gps.lat}, ${P.gps.lng} ±${P.gps.acc}m`:'no GPS'];P.blob=await stampPhoto(f,lines,1100);$('pPrev').src=URL.createObjectURL(P.blob);$('pPrev').style.display='block';checkPunch()};
+$('pCancel').onclick=()=>{P=null;$('punchSheet').hidden=true};
+$('pOk').onclick=async()=>{const d=today(),p=nowParts();if(P.k==='arrive'&&!$('pDoor').value.trim()){toast('Type the store name');return}
+  const e={id:uid(),k:P.k,t:p.hhmm,iso:p.iso,date:p.date,door:P.k==='arrive'?$('pDoor').value.trim():'',note:$('pNote').value.trim(),lat:P.gps?P.gps.lat:null,lng:P.gps?P.gps.lng:null,acc:P.gps?P.gps.acc:null,photoKey:'ph_'+uid(),status:'queued'};
+  await dbPut(e.photoKey,P.blob);d.events.push(e);if(P.k==='end')d.ended=true;persist();$('punchSheet').hidden=true;renderToday();enqueue(true);
+  // closed a leg? prompt fare
+  if(P.k==='arrive'||P.k==='end'){const L=legs(d);const leg=L[L.length-1];if(leg&&(leg.dist==null||leg.dist>0.3)){toast('Punched. Add the fare for this trip, or tap Later.');openExpense({type:'leg',from:leg.from.id,to:leg.to.id},true)}}
+  P=null};
+
+/* ---------- expenses ---------- */
+let E=null;
+function needsReceipt(x){return !(x.cat==='Transportation'&&['Jeepney','Tricycle','Pedicab','MRT / LRT'].includes(x.sub))&&x.cat!=='Load allowance'}
+function attachOptions(d){const o=[];legs(d).slice().reverse().slice(0,4).forEach(l=>o.push({v:`leg|${l.from.id}|${l.to.id}`,t:`Travel ${l.fromLabel} → ${l.toLabel} (${l.from.t}–${l.to.t})`}));doors(d).slice().reverse().forEach(({a})=>o.push({v:`door|${a.id}`,t:`At ${a.door} (${a.t})`}));o.push({v:'day',t:'The whole day'});return o}
+function openExpense(attach,fromPunch){const d=today();E={fromPunch:!!fromPunch,blob:null};$('eTitle').textContent=fromPunch?'Fare for this trip':'Add expense';const sel=$('eAttach');sel.innerHTML='';attachOptions(d).forEach(o=>{const x=document.createElement('option');x.value=o.v;x.textContent=o.t;sel.appendChild(x)});
+  if(attach){sel.value=attach.type==='leg'?`leg|${attach.from}|${attach.to}`:attach.type==='door'?`door|${attach.door}`:'day'}
+  const c=$('eCat');c.innerHTML='';Object.keys(CATS).forEach(k=>{const x=document.createElement('option');x.value=k;x.textContent=k;c.appendChild(x)});c.value=sel.value.startsWith('leg')?'Transportation':'Meal allowance';renderSub();$('eAmt').value='';$('eNote').value='';$('ePhoto').value='';$('ePrev').style.display='none';$('eHint').textContent='';$('expSheet').hidden=false;setTimeout(()=>$('eAmt').focus(),50)}
+function renderSub(){const c=$('eCat').value,s=$('eSub');s.innerHTML='';CATS[c].forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;s.appendChild(o)});$('eSubL').textContent=c==='Transportation'?'Mode':c==='Transmittal'?'Courier':'Sub-category';$('eNoteL').firstChild.textContent=NEEDS_NOTE[c]?NEEDS_NOTE[c]:'Note';$('eNote').placeholder=NEEDS_NOTE[c]?'required':'only if needed'}
+$('eCat').onchange=renderSub;
+$('ePhoto').onchange=async()=>{const f=$('ePhoto').files[0];if(!f)return;const p=nowParts();E.blob=await stampPhoto(f,[`${p.date} ${p.hhmm} · ${CFG.name}`],1400);$('ePrev').src=URL.createObjectURL(E.blob);$('ePrev').style.display='block'};
+$('eCancel').onclick=()=>{E=null;$('expSheet').hidden=true};
+$('eOk').onclick=async()=>{const d=today(),p=nowParts();const amt=parseFloat($('eAmt').value);if(!(amt>0)){toast('Enter the amount');return}const cat=$('eCat').value,sub=$('eSub').value,note=$('eNote').value.trim();if(NEEDS_NOTE[cat]&&!note){toast(NEEDS_NOTE[cat]+' is required');return}
+  const v=$('eAttach').value.split('|');const attach=v[0]==='leg'?{type:'leg',from:v[1],to:v[2]}:v[0]==='door'?{type:'door',door:v[1]}:{type:'day'};
+  const x={id:uid(),date:d.date,project:d.project,cat,sub,amt,note,attach,enteredAt:p.iso,receiptKey:E.blob?'rc_'+uid():'',status:'queued'};
+  if(E.blob)await dbPut(x.receiptKey,E.blob);EXP.push(x);persist();$('expSheet').hidden=true;E=null;renderToday();enqueue(true);if(!x.receiptKey&&needsReceipt(x))toast('Saved without receipt. You can add it later from Today.')};
+$('addExp').onclick=()=>openExpense(null,false);
+
+/* ---------- budget ---------- */
+let BB=null;
+$('addBudget').onclick=()=>{BB={blob:null};$('bProject').value=today().project;$('bAmt').value='';$('bDays').value='1';$('bNote').value='';$('bPhoto').value='';$('bPrev').style.display='none';$('budSheet').hidden=false};
+$('bPhoto').onchange=async()=>{const f=$('bPhoto').files[0];if(!f)return;BB.blob=await stampPhoto(f,null,1200);$('bPrev').src=URL.createObjectURL(BB.blob);$('bPrev').style.display='block'};
+$('bCancel').onclick=()=>{BB=null;$('budSheet').hidden=true};
+$('bOk').onclick=async()=>{const amt=parseFloat($('bAmt').value);if(!(amt>0)){toast('Enter the amount');return}const p=nowParts();const b={id:uid(),date:p.date,project:$('bProject').value,amt,days:parseInt($('bDays').value)||1,note:$('bNote').value.trim(),shotKey:BB.blob?'bs_'+uid():'',status:'queued',closed:false};if(BB.blob)await dbPut(b.shotKey,BB.blob);BUD.push(b);persist();$('budSheet').hidden=true;BB=null;renderToday();renderDays();enqueue(true)};
+
+/* ---------- upload queue ---------- */
+function base(){return{token:CFG.token,fa:CFG.name,team:CFG.team,device:DEVICE,appVersion:VERSION}}
+function pending(){const out=[];Object.values(DAYS).forEach(d=>d.events.forEach(e=>{if(e.status!=='sent')out.push({kind:'punch',rec:e,day:d})}));EXP.forEach(x=>{if(x.status!=='sent')out.push({kind:'expense',rec:x})});BUD.forEach(b=>{if(b.status!=='sent')out.push({kind:'budget',rec:b})});return out}
+async function post(body){const r=await fetch(CFG.url,{method:'POST',body:JSON.stringify(body)});return await r.json()}
+async function sendItem(it){const r=it.rec;let body={...base(),kind:it.kind,id:r.id};
+  if(it.kind==='punch'){const d=it.day;body={...body,date:d.date,project:d.project,wod:d.wod,punch:r.k,time:r.t,iso:r.iso,door:r.door,note:r.note,lat:r.lat,lng:r.lng,acc:r.acc,filename:`${d.date.replace(/-/g,'')}_${r.t.replace(':','')}_${r.k}_${DEVICE}.jpg`};const b=await dbGet(r.photoKey);if(b)body.photo=await b64(b)}
+  else if(it.kind==='expense'){body={...body,date:r.date,project:r.project,category:r.cat,sub:r.sub,amount:r.amt,note:r.note,attachType:r.attach.type,attachFrom:r.attach.from||'',attachTo:r.attach.to||'',attachDoor:r.attach.door||'',enteredAt:r.enteredAt,filename:r.receiptKey?`${r.date.replace(/-/g,'')}_${r.cat.replace(/\W+/g,'')}_${r.id}.jpg`:''};if(r.receiptKey){const b=await dbGet(r.receiptKey);if(b)body.photo=await b64(b)}}
+  else{body={...body,date:r.date,project:r.project,amount:r.amt,days:r.days,note:r.note,closed:r.closed?1:0,closedRem:r.closedRem==null?'':r.closedRem,filename:r.shotKey?`${r.date.replace(/-/g,'')}_budget_${r.id}.jpg`:''};if(r.shotKey){const b=await dbGet(r.shotKey);if(b)body.photo=await b64(b)}}
+  try{const j=await post(body);if(j.ok){r.status='sent';r.sentAt=new Date().toISOString()}else r.status='failed';return j}catch(e){r.status='failed';return{ok:false,net:true,error:String(e&&e.message||e)}}}
+async function enqueue(quiet){if(!CFG.url||QUEUE_RUNNING)return;if(!navigator.onLine){if(!quiet)setUp('No signal. Upload resumes when the phone is online.',true);return}QUEUE_RUNNING=true;try{const items=pending();let n=0,stop=null;for(const it of items){if(!navigator.onLine){stop='No signal. Will retry.';break}setUp(`Uploading ${n+1} of ${items.length}…`);const j=await sendItem(it);persist();if(j.ok)n++;else{stop=j.error==='bad token'?'Upload refused: the token phrase does not match the script. Check Settings.':j.net?'Could not reach the upload link (weak signal, or the link changed). Will retry.':'Upload refused: '+(j.error||'unknown');break}}
+    setUp(stop?stop:(items.length?`${n} item(s) uploaded.`:'Everything is uploaded.'),!!stop)}finally{QUEUE_RUNNING=false;renderToday();renderUpload()}}
+function setUp(t,bad){const s=$('upStatus');s.className='status'+(bad?' bad':'');s.textContent=t}
+$('uploadBtn').onclick=()=>enqueue(false);
+window.addEventListener('online',()=>enqueue(true));document.addEventListener('visibilitychange',()=>{if(!document.hidden)enqueue(true)});
+
+/* ---------- tabs & boot ---------- */
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));['today','days','upload'].forEach(id=>$(id).hidden=id!==b.dataset.tab);$('settings').hidden=true;if(b.dataset.tab==='days')renderDays();if(b.dataset.tab==='upload')renderUpload()});
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+(function boot(){CFG=Object.assign(CFG,load('atlas.cfg',{}));DAYS=load('atlas.days',{});EXP=load('atlas.exp',[]);BUD=load('atlas.bud',[]);
+  Object.values(DAYS).forEach(d=>d.events.forEach(e=>{if(e.status==='uploading')e.status='failed'}));
+  renderProjects();renderToday();if(!CFG.name||!CFG.url){$('settings').hidden=false;renderCfg()}enqueue(true)})();
+</script>
+</body>
+</html>
